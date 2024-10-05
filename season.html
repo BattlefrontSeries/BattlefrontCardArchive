@@ -22,12 +22,27 @@
     </section>
 
     <script>
-        const selectedSeason = localStorage.getItem('selectedSeason');
+
+        // Function to get URL parameters
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const season = params.get('season');
+            
+            if (season) {
+                localStorage.setItem('selectedSeason', season);
+            }
+        }
+
+        // Run this when the page loads
+        getQueryParams();
+
+        // Now retrieve season and cardType from localStorage
+        const selectedSeason = localStorage.getItem('selectedSeason').replace("_", " ");
         document.getElementById('seasonHeader').textContent = `Season: ${selectedSeason}`;
 
         function loadCardType(cardType) {
-            localStorage.setItem('selectedCardType', cardType);  // Save the selected card type
-            window.location.href = 'card-gallery.html';  // Redirect to card gallery page
+            const url = `card-gallery.html?season=${encodeURIComponent(selectedSeason)}&cardType=${encodeURIComponent(cardType)}`;
+            window.location.href = url;
         }
     </script>
 </body>

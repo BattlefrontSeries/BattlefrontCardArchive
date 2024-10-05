@@ -4,11 +4,12 @@ body {
     margin: 0;
     padding: 0;
     text-align: center;
+    background-color: #333333;
 }
 
 header h1 {
-    background-color: #333;
-    color: white;
+    /*background-color: #333;*/
+    color: rgb(255, 16, 88);
     padding: 20px;
 }
 
@@ -65,12 +66,4 @@ button {
     border: none;
     color: white;
     cursor: pointer;
-}
-
-#prevButton {
-    left: 10px;
-}
-
-#nextButton {
-    right: 10px;
 }
