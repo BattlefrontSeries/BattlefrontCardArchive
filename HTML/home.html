@@ -24,4 +24,61 @@
         }
     </script>
 </body>
+
+
+<title>Card Viewer</title>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script>
+        var API_KEY = "AIzaSyB1nUk56i3cBQcqLLPWvI-NNDJ9XYNOFIc";
+
+        function authenticate() {
+            return gapi.auth2.getAuthInstance()
+                .signIn({scope: "https://www.googleapis.com/auth/drive.readonly"})
+                .then(function() {
+                    console.log("Sign-in successful");
+                }, function(err) {
+                    console.error("Error signing in", err);
+                });
+        }
+
+        function loadClient() {
+            gapi.client.setApiKey(API_KEY);
+            return gapi.client.load("https://content.googleapis.com/discovery/v1/apis/drive/v3/rest")
+                .then(function() {
+                    console.log("GAPI client loaded for API");
+                }, function(err) {
+                    console.error("Error loading GAPI client for API", err);
+                });
+        }
+
+        function listFiles() {
+            return gapi.client.drive.files.list({
+                "pageSize": 10, // number of files to fetch
+                "fields": "files(id, name, webViewLink, webContentLink)",
+                "q": "'FOLDER_ID' in parents" // ID of the Google Drive folder
+            })
+            .then(function(response) {
+                const files = response.result.files;
+                files.forEach(file => {
+                    console.log(file);
+                    const img = document.createElement("img");
+                    img.src = file.webContentLink;
+                    document.body.appendChild(img);
+                });
+            }, function(err) {
+                console.error("Execute error", err);
+            });
+        }
+
+        gapi.load("client:auth2", function() {
+            gapi.auth2.init({client_id: "YOUR_CLIENT_ID"});
+        });
+    </script>
+</head>
+<body>
+    <h1>Player Card Viewer</h1>
+    <button onclick="authenticate().then(loadClient)">Authorize and Load</button>
+    <button onclick="listFiles()">List Images</button>
+</body>
+
 </html>
