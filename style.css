@@ -4,13 +4,25 @@ body {
     margin: 0;
     padding: 0;
     text-align: center;
-    background-color: #333333;
+    background-color: rgb(32, 32, 32);
 }
 
 header h1 {
     /*background-color: #333;*/
-    color: rgb(255, 16, 88);
-    padding: 20px;
+    color: #FF155D;
+    padding: 10px;
+}
+
+header h2 {
+    /*background-color: #333;*/
+    color: #ffffff;
+    padding: 10px;
+}
+
+header h3 {
+    /*background-color: #333;*/
+    color: #ffd000;
+    padding: 10px;
 }
 
 section {

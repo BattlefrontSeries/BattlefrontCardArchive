@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Gallery</title>
-    <link rel="stylesheet" href="CSS/style.css">
+    <link rel="stylesheet" href="style.css">
     <style>
         /* Modal (Popup) styles */
         #overlay {
@@ -160,6 +160,15 @@
             currentIndex = (currentIndex < imageElements.length - 1) ? currentIndex + 1 : 0;
             popupImage.src = imageElements[currentIndex].src; // Update image source
         };
+
+        // Handle key press for left and right arrows
+        function handleKeyPress(event) {
+            if (event.key === 'ArrowLeft') {
+                leftArrow.click(); // Trigger left arrow click
+            } else if (event.key === 'ArrowRight') {
+                rightArrow.click(); // Trigger right arrow click
+            }
+        }
 
         // Main function to load the gallery
         function loadGallery() {
