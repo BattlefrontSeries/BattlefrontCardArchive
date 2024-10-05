@@ -43,7 +43,7 @@
 
                 imagePaths.forEach((imagePath, index) => {
                     const img = document.createElement('img');
-                    img.src = `Files/CardArchive/${imagePath}`; // Use relative path to load images
+                    img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
                     img.classList.add('card-image'); // Apply styling (make sure CSS exists for this)
                     img.onclick = () => openPopup(index); // Attach onclick handler
                     cardGrid.appendChild(img);
