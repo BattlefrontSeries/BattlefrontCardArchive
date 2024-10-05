@@ -4,21 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Gallery</title>
-    <link rel="stylesheet" href="style.css">
-    <style>
-        /* Styling for images and grid layout */
-        .card-image {
-            width: 150px;  /* Set the width of the images */
-            height: auto;  /* Maintain aspect ratio */
-            margin: 10px;  /* Set margin for spacing */
-            cursor: pointer; /* Pointer cursor on hover */
-        }
-        .grid-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Adjust grid based on available space */
-            gap: 10px;  /* Set spacing between grid items */
-        }
-    </style>
+    <link rel="stylesheet" href="style.css"> <!-- Your CSS for layout and styling -->
 </head>
 <body>
     <header>
@@ -29,36 +15,65 @@
     </section>
 
     <script>
-        // Set the season and card type from local storage
-        const season = localStorage.getItem('selectedSeason') || "BS_Season1"; // Default to BS Season 1
-        const cardType = localStorage.getItem('selectedCardType') || "Base"; // Default to Base
-
-        // Update the gallery header
-        document.getElementById('galleryHeader').textContent = `${season.replace(/_/g, ' ')} - ${cardType} Cards`;
-
-        // Function to load images dynamically
-        async function loadImages() {
-            const response = await fetch(`/api/images?season=${season}&cardType=${cardType}`);
-            const images = await response.json();
-            const cardGrid = document.getElementById('cardGrid');
-            
-            images.forEach((imageSrc, index) => {
-                const img = document.createElement('img');
-                img.src = imageSrc; // Use the fetched image source
-                img.classList.add('card-image');
-                img.onclick = () => openPopup(index); // Set the click event
-                cardGrid.appendChild(img);
-            });
-        }
-
         // Function to open card popup
         function openPopup(index) {
             localStorage.setItem('selectedCardIndex', index); // Save selected image index
             window.location.href = 'card-popup.html'; // Redirect to card popup
         }
 
-        // Load images when the page is ready
-        loadImages();
+        // Load JSON file
+        function loadJsonFile(filePath) {
+            return fetch(filePath)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Failed to load JSON file');
+                    }
+                    return response.json();
+                });
+        }
+
+        // Load images and display them in the gallery
+        function loadImagesForGallery(jsonData, season, cardType) {
+            const key = `${season}/${cardType}`; // Create key from selected season and card type
+            const imagePaths = jsonData[key]; // Get image paths from JSON based on the key
+
+            if (imagePaths && imagePaths.length > 0) {
+                const cardGrid = document.getElementById('cardGrid');
+                cardGrid.innerHTML = ''; // Clear any existing content
+
+                imagePaths.forEach((imagePath, index) => {
+                    const img = document.createElement('img');
+                    img.src = `Files/CardArchive/${imagePath}`; // Use relative path to load images
+                    img.classList.add('card-image'); // Apply styling (make sure CSS exists for this)
+                    img.onclick = () => openPopup(index); // Attach onclick handler
+                    cardGrid.appendChild(img);
+                });
+            } else {
+                console.error(`No images found for ${season} - ${cardType}`);
+            }
+        }
+
+        // Main function to load the gallery
+        function loadGallery() {
+            // Fetch the selected season and card type from local storage
+            const season = localStorage.getItem('selectedSeason');
+            const cardType = localStorage.getItem('selectedCardType');
+
+            // Set gallery header based on season and card type
+            document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
+
+            // Load the JSON file containing image paths
+            loadJsonFile('Files/CardArchive/imageList.json')
+                .then(jsonData => {
+                    loadImagesForGallery(jsonData, season, cardType);
+                })
+                .catch(error => {
+                    console.error('Error loading JSON:', error);
+                });
+        }
+
+        // Load the gallery when the page loads
+        window.onload = loadGallery;
     </script>
 </body>
 </html>
