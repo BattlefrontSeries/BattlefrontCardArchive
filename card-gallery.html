@@ -15,6 +15,26 @@
     </section>
 
     <script>
+        // Function to get URL parameters
+        function getQueryParams() {
+            const params = new URLSearchParams(window.location.search);
+            const season = params.get('season');
+            const cardType = params.get('cardType');
+            
+            if (season && cardType) {
+                localStorage.setItem('selectedSeason', season);
+                localStorage.setItem('selectedCardType', cardType);
+            }
+        }
+
+        // Run this when the page loads
+        getQueryParams();
+
+        // Now retrieve season and cardType from localStorage
+        const season = localStorage.getItem('selectedSeason');
+        const cardType = localStorage.getItem('selectedCardType');
+        document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
+
         // Function to open card popup
         function openPopup(index) {
             localStorage.setItem('selectedCardIndex', index); // Save selected image index

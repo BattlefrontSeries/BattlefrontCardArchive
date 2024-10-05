@@ -23,17 +23,15 @@ button {
     cursor: pointer;
 }
 
-/* Grid for displaying cards */
 .grid-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 10px;
-    padding: 20px;
+    gap: 10px; /* Adjusts the space between images */
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Minimum size for each card */
 }
 
 .card-image {
-    width: 100%;
-    cursor: pointer;
+    width: 100%; /* Makes the images responsive */
+    height: auto;
 }
 
 /* Popup styling */
