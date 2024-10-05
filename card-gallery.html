@@ -114,7 +114,7 @@
                     cardGrid.appendChild(img);
                 });
             } else {
-                console.error(`No images found for ${season} - ${cardType}`);
+                console.error(`No images found for ${key}`);
             }
         }
 
@@ -133,17 +133,20 @@
                 popupImage.src = imageElements[currentIndex].src; // Set popup image to the clicked image
                 overlay.style.display = 'block'; // Show overlay
             }
+            document.addEventListener('keydown', handleKeyPress); // Add keydown event listener
         }
 
         // Function to close the popup
         closeBtn.onclick = () => {
             overlay.style.display = 'none';
+            document.removeEventListener('keydown', handleKeyPress); // Remove keydown event listener
         };
 
         // Click outside the image to close the overlay
         window.onclick = (event) => {
             if (event.target === overlay) {
                 overlay.style.display = 'none';
+                document.removeEventListener('keydown', handleKeyPress); // Remove keydown event listener
             }
         };
 
@@ -180,7 +183,7 @@
             document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
 
             // Load the JSON file containing image paths
-            loadJsonFile('Files/CardArchive/imageList.json')
+            loadJsonFile('Files/imageList.json')
                 .then(jsonData => {
                     loadImagesForGallery(jsonData, season, cardType);
                 })
