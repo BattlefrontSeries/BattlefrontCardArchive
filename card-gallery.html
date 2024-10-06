@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Card Gallery</title>
     <link rel="stylesheet" href="style.css">
+    <!-- Include the imageNameParser.js file -->
+    <script src="imageNameParser.js" defer></script> <!-- Defer ensures the script runs after the page loads -->
     <style>
         /* Modal (Popup) styles */
         #overlay {
@@ -86,38 +88,6 @@
         // Run this when the page loads
         getQueryParams();
 
-        // Load JSON file
-        function loadJsonFile(filePath) {
-            return fetch(filePath)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Failed to load JSON file');
-                    }
-                    return response.json();
-                });
-        }
-
-        // Load images and display them in the gallery
-        function loadImagesForGallery(jsonData, season, cardType) {
-            const key = `${season}/${cardType}`; // Create key from selected season and card type
-            const imagePaths = jsonData[key]; // Get image paths from JSON based on the key
-
-            if (imagePaths && imagePaths.length > 0) {
-                const cardGrid = document.getElementById('cardGrid');
-                cardGrid.innerHTML = ''; // Clear any existing content
-
-                imagePaths.forEach((imagePath, index) => {
-                    const img = document.createElement('img');
-                    img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
-                    img.classList.add('card-image'); // Apply styling
-                    img.onclick = () => openPopup(index); // Attach onclick handler
-                    cardGrid.appendChild(img);
-                });
-            } else {
-                console.error(`No images found for ${key} using JSON file lookup:\n`, jsonData);
-            }
-        }
-
         // Function to open the popup with the clicked image
         let currentIndex = 0; // Track which card is currently shown in the popup
         const overlay = document.getElementById('overlay');
@@ -182,18 +152,26 @@
             // Set gallery header based on season and card type
             document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
 
-            // Load the JSON file containing image paths
-            loadJsonFile('Files/imageList.json')
-                .then(jsonData => {
-                    loadImagesForGallery(jsonData, season, cardType);
-                })
-                .catch(error => {
-                    console.error('Error loading JSON:', error);
-                });
-        }
+            let imagePaths = getImages(season, cardType);
+            if (imagePaths && imagePaths.length > 0) {
+                const cardGrid = document.getElementById('cardGrid');
+                cardGrid.innerHTML = ''; // Clear any existing content
 
+                imagePaths.forEach((imagePath, index) => {
+                    const img = document.createElement('img');
+                    img.src = imagePath;
+                    img.classList.add('card-image'); // Apply styling
+                    img.onclick = () => openPopup(index); // Attach onclick handler
+                    cardGrid.appendChild(img);
+                });
+            }
+        }
+        
         // Call the loadGallery function on page load
-        loadGallery();
+        document.addEventListener('DOMContentLoaded', function() {
+            // Ensure the external JS file is fully loaded
+            loadGallery();
+        });
     </script>
 </body>
 </html>
