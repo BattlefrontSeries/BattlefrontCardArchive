@@ -63,7 +63,8 @@ button {
 }
 
 .grid-container {
-    display: grid;
+    /*display: grid;*/
+    display: none; /* Hide the grid initially */
     gap: 10px; /* Adjusts the space between images */
     grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); /* Minimum size for each card */
 }
@@ -104,4 +105,24 @@ button {
     border: none;
     color: white;
     cursor: pointer;
+}
+
+/* Spinner styles */
+.spinner {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #3498db; /* Blue */
+    border-radius: 50%;
+    width: 60px; /* Size of the spinner */
+    height: 60px; /* Size of the spinner */
+    animation: spin 1s linear infinite; /* Spin animation */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%); /* Center it */
+    z-index: 9999; /* Make sure it's on top */
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }

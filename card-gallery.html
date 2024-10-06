@@ -24,6 +24,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            transition: transform 0.5s ease; /* Smooth transition */
             max-width: 80%;
             max-height: 80%;
         }
@@ -54,6 +55,27 @@
             color: white;
             cursor: pointer;
         }
+
+        #imageContainer {
+            position: relative;
+            width: 80%; /* Or your desired width */
+            height: 80%; /* Or your desired height */
+            overflow: hidden; /* Hide overflow to prevent showing the images outside */
+            pointer-events: none; /* Disable pointer events for this container */
+        }
+
+        #popupImage, #previousImage {
+            position: absolute; /* Allow for stacking */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.5s ease; /* Smooth transition */
+        }
+
+        #previousImage {
+            display: none; /* Initially hidden */
+        }
+
     </style>
 </head>
 <body>
@@ -102,6 +124,10 @@
         <img id="popupImage" src="">
         <span id="rightArrow" class="arrow">&#10095;</span> <!-- Right Arrow -->
     </div>
+    
+
+    <!-- Spinner Element -->
+    <div id="loadingSpinner" class="spinner" style="display: none;"></div>
 
     <!-- Selectors -->
     <script>
@@ -148,61 +174,6 @@
         // Run this when the page loads
         getQueryParams();
 
-        // Function to open the popup with the clicked image
-        let currentIndex = 0; // Track which card is currently shown in the popup
-        const overlay = document.getElementById('overlay');
-        const popupImage = document.getElementById('popupImage');
-        const closeBtn = document.getElementById('closeBtn');
-        const leftArrow = document.getElementById('leftArrow');
-        const rightArrow = document.getElementById('rightArrow');
-
-        function openPopup(index) {
-            currentIndex = index;
-            const imageElements = document.querySelectorAll('.card-image');
-            if (imageElements.length > 0) {
-                popupImage.src = imageElements[currentIndex].src; // Set popup image to the clicked image
-                overlay.style.display = 'block'; // Show overlay
-            }
-            document.addEventListener('keydown', handleKeyPress); // Add keydown event listener
-        }
-
-        // Function to close the popup
-        closeBtn.onclick = () => {
-            overlay.style.display = 'none';
-            document.removeEventListener('keydown', handleKeyPress); // Remove keydown event listener
-        };
-
-        // Click outside the image to close the overlay
-        window.onclick = (event) => {
-            if (event.target === overlay) {
-                overlay.style.display = 'none';
-                document.removeEventListener('keydown', handleKeyPress); // Remove keydown event listener
-            }
-        };
-
-        // Cycle to the previous image
-        leftArrow.onclick = () => {
-            const imageElements = document.querySelectorAll('.card-image');
-            currentIndex = (currentIndex > 0) ? currentIndex - 1 : imageElements.length - 1;
-            popupImage.src = imageElements[currentIndex].src; // Update image source
-        };
-
-        // Cycle to the next image
-        rightArrow.onclick = () => {
-            const imageElements = document.querySelectorAll('.card-image');
-            currentIndex = (currentIndex < imageElements.length - 1) ? currentIndex + 1 : 0;
-            popupImage.src = imageElements[currentIndex].src; // Update image source
-        };
-
-        // Handle key press for left and right arrows
-        function handleKeyPress(event) {
-            if (event.key === 'ArrowLeft') {
-                leftArrow.click(); // Trigger left arrow click
-            } else if (event.key === 'ArrowRight') {
-                rightArrow.click(); // Trigger right arrow click
-            }
-        }
-
         // Load images and display them in the gallery
         function loadImagesForGallery(jsonData, season, cardType, faction) {
             const key = `${season}/${cardType}`; // Create key from selected season and card type
@@ -238,7 +209,7 @@
         }
 
         // Main function to load the gallery
-        function loadGallery(season, cardType, faction) {
+        async function loadGallery(season, cardType, faction) {
             // Fetch the selected season and card type from local storage
             //const season = localStorage.getItem('selectedSeason').replace("_", " ");
             //const cardType = localStorage.getItem('selectedCardType').replace("_", " ");
@@ -246,13 +217,24 @@
             // Set gallery header based on season and card type
             document.getElementById('galleryHeader').textContent = `${season} - ${nicifyString(cardType)} Cards`;
 
+            // Show the spinner
+            document.getElementById('loadingSpinner').style.display = 'block';
+
             // Load the JSON file containing image paths
             loadJsonFile('Files/imageList.json')
                 .then(jsonData => {
-                    loadImagesForGallery(jsonData, season, cardType, faction);
+                    return loadImagesForGallery(jsonData, season, cardType, faction);
+                })
+                .then(() => {
+                    // Hide the spinner after loading images
+                    document.getElementById('loadingSpinner').style.display = 'none';
+                    // Show the card grid
+                    document.getElementById('cardGrid').style.display = 'grid'; // or 'flex', depending on your layout
                 })
                 .catch(error => {
                     console.error('Error loading JSON:', error);
+                    // Hide the spinner in case of error
+                    document.getElementById('loadingSpinner').style.display = 'none';
                 });
         }
 
@@ -292,6 +274,111 @@
         document.addEventListener('DOMContentLoaded', function() {
             // Ensure the external JS file is fully loaded
             reloadGallery();
+        });
+    </script>
+
+    <!-- Script for popup image -->
+    <script>
+        // Function to open the popup with the clicked image
+        let currentIndex = 0; // Track which card is currently shown in the popup
+        const overlay = document.getElementById('overlay');
+        const popupImage = document.getElementById('popupImage');
+        const closeBtn = document.getElementById('closeBtn');
+        const leftArrow = document.getElementById('leftArrow');
+        const rightArrow = document.getElementById('rightArrow');
+
+        // Function to open the popup with the clicked image
+        function openPopup(index) {
+            currentIndex = index;
+            const imageElements = document.querySelectorAll('.card-image');
+            if (imageElements.length > 0) {
+                popupImage.src = imageElements[currentIndex].src; // Set popup image to the clicked image
+                overlay.style.display = 'block'; // Show overlay
+            }
+        }
+
+        // Function to animate image swipe
+        function animateImageSwipe(direction) {
+            const imageElements = document.querySelectorAll('.card-image');
+
+            // Set the previous image
+            previousImage.src = popupImage.src; // Copy the current image source
+            previousImage.style.display = 'block'; // Make the previous image visible
+
+            // Calculate new index based on the direction
+            if (direction === 'left') {
+                currentIndex = (currentIndex > 0) ? currentIndex - 1 : imageElements.length - 1; // Previous image
+                popupImage.src = imageElements[currentIndex].src; // Update the popup image source
+
+                // Animate the previous image to the left
+                previousImage.style.transform = 'translate(-150%, -50%)'; // Move it out of view
+                popupImage.style.transform = 'translate(0%, -50%)'; // Bring the new image to the center
+            } else {
+                currentIndex = (currentIndex < imageElements.length - 1) ? currentIndex + 1 : 0; // Next image
+                popupImage.src = imageElements[currentIndex].src; // Update the popup image source
+
+                // Animate the previous image to the right
+                previousImage.style.transform = 'translate(150%, -50%)'; // Move it out of view
+                popupImage.style.transform = 'translate(0%, -50%)'; // Bring the new image to the center
+            }
+
+            // Reset position after animation ends
+            setTimeout(() => {
+                previousImage.style.display = 'none'; // Hide the previous image
+                previousImage.style.transform = 'translate(0%, -50%)'; // Reset position for the next use
+            }, 500); // Wait for the transition to complete before removing
+        }
+
+        // Cycle to the previous image
+        /*leftArrow.onclick = () => {
+            animateImageSwipe('left'); // Animate swipe left
+        };
+
+        // Cycle to the next image
+        rightArrow.onclick = () => {
+            animateImageSwipe('right'); // Animate swipe right
+        };*/
+
+         // Cycle to the previous image
+         leftArrow.onclick = () => {
+            const imageElements = document.querySelectorAll('.card-image');
+            currentIndex = (currentIndex > 0) ? currentIndex - 1 : imageElements.length - 1;
+            popupImage.src = imageElements[currentIndex].src; // Update image source
+        };
+
+        // Cycle to the next image
+        rightArrow.onclick = () => {
+            const imageElements = document.querySelectorAll('.card-image');
+            currentIndex = (currentIndex < imageElements.length - 1) ? currentIndex + 1 : 0;
+            popupImage.src = imageElements[currentIndex].src; // Update image source
+        };
+
+        // Function to close the popup
+        closeBtn.onclick = () => {
+            overlay.style.display = 'none';
+        };
+
+        // Click outside the image to close the overlay
+        window.onclick = (event) => {
+            if (event.target === overlay) {
+                overlay.style.display = 'none';
+            }
+        };
+
+        // Handle key press for left and right arrows
+        function handleKeyPress(event) {
+            if (event.key === 'ArrowLeft') {
+                leftArrow.click(); // Trigger left arrow click
+            } else if (event.key === 'ArrowRight') {
+                rightArrow.click(); // Trigger right arrow click
+            }
+        }
+
+        // Add event listener for keydown events when the overlay is displayed
+        document.addEventListener('keydown', (event) => {
+            if (overlay.style.display === 'block') {
+                handleKeyPress(event);
+            }
         });
     </script>
 </body>
