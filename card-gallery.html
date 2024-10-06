@@ -143,6 +143,29 @@
             }
         }
 
+        // Load images and display them in the gallery
+        function loadImagesForGallery(jsonData, season, cardType) {
+            const key = `${season}/${cardType}`; // Create key from selected season and card type
+            let imagePaths = jsonData[key]; // Get image paths from JSON based on the key
+
+            // Sort the card by rating
+            imagePaths = sortImagesByKey(imagePaths, 'rating', 'descending');
+
+            if (imagePaths && imagePaths.length > 0) {
+                const cardGrid = document.getElementById('cardGrid');
+                cardGrid.innerHTML = ''; // Clear any existing content
+                imagePaths.forEach((imagePath, index) => {
+                    const img = document.createElement('img');
+                    img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
+                    img.classList.add('card-image'); // Apply styling
+                    img.onclick = () => openPopup(index); // Attach onclick handler
+                    cardGrid.appendChild(img);
+                });
+            } else {
+                console.error(`No images found for ${key} using JSON file lookup:\n`, jsonData);
+            }
+        }
+
         // Main function to load the gallery
         function loadGallery() {
             // Fetch the selected season and card type from local storage
@@ -152,21 +175,48 @@
             // Set gallery header based on season and card type
             document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
 
-            let imagePaths = getImages(season, cardType);
-            if (imagePaths && imagePaths.length > 0) {
-                const cardGrid = document.getElementById('cardGrid');
-                cardGrid.innerHTML = ''; // Clear any existing content
-
-                imagePaths.forEach((imagePath, index) => {
-                    const img = document.createElement('img');
-                    img.src = imagePath;
-                    img.classList.add('card-image'); // Apply styling
-                    img.onclick = () => openPopup(index); // Attach onclick handler
-                    cardGrid.appendChild(img);
+            // Load the JSON file containing image paths
+            loadJsonFile('Files/imageList.json')
+                .then(jsonData => {
+                    loadImagesForGallery(jsonData, season, cardType);
+                })
+                .catch(error => {
+                    console.error('Error loading JSON:', error);
                 });
-            }
         }
-        
+
+        // Main function to load the gallery
+        /*async function loadGallery() {
+            // Fetch the selected season and card type from local storage
+            const season = localStorage.getItem('selectedSeason').replace("_", " ");
+            const cardType = localStorage.getItem('selectedCardType').replace("_", " ");
+
+            // Set gallery header based on season and card type
+            document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
+
+            try {
+                // Await the result from getImages (since it returns a promise)
+                const imagePaths = await getImages(season, cardType);
+
+                console.log(imagePaths); // Log the image paths to verify
+
+                if (imagePaths && imagePaths.length > 0) {
+                    const cardGrid = document.getElementById('cardGrid');
+                    cardGrid.innerHTML = ''; // Clear any existing content
+
+                    imagePaths.forEach((imagePath, index) => {
+                        const img = document.createElement('img');
+                        img.src = imagePath;
+                        img.classList.add('card-image'); // Apply styling
+                        img.onclick = () => openPopup(index); // Attach onclick handler
+                        cardGrid.appendChild(img);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading images:', error);
+            }
+        }*/
+
         // Call the loadGallery function on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Ensure the external JS file is fully loaded
