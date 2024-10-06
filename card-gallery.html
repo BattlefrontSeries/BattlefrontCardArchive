@@ -60,6 +60,37 @@
     <header>
         <h1 id="galleryHeader"></h1>
     </header>
+
+    <!-- Top Navigation Bar -->
+    <nav>
+        <div>
+            <label for="seasonSelect">BS S1</label> <!-- Label above the select -->
+            <select id="seasonSelect">
+                <option value="BS S1">BS S1</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="cardTypeSelect">Faction</label> <!-- Label above the select -->
+            <select id="cardTypeSelect">
+                <option value="Base">Base</option>
+                <option value="ManOfTheMatch">Man Of The Match</option>
+                <option value="OnesToWatch">Ones To Watch</option>
+                <option value="TeamOfTheSeason">Team Of The Season</option>
+                <option value="MVP">MVP</option>
+            </select>
+        </div>
+
+        <div>
+            <label for="factionSelect">Faction</label> <!-- Label above the select -->
+            <select id="factionSelect">
+                <option value="Both">Both</option>
+                <option value="Rebel">Rebel</option>
+                <option value="Imperial">Imperial</option>
+            </select>
+        </div>
+    </nav>
+
     <section>
         <div id="cardGrid" class="grid-container"></div>
     </section>
@@ -71,6 +102,35 @@
         <img id="popupImage" src="">
         <span id="rightArrow" class="arrow">&#10095;</span> <!-- Right Arrow -->
     </div>
+
+    <!-- Selectors -->
+    <script>
+        // Get the faction select element and filter button
+        const seasonSelect = document.getElementById('seasonSelect');
+        const cardTypeSelect = document.getElementById('cardTypeSelect');
+        const factionSelect = document.getElementById('factionSelect');
+        var selectedSeason = seasonSelect.value;
+        var selectedCardType = cardTypeSelect.value;
+        var selectedFaction = factionSelect.value;
+
+        // Listen for change events on the seasonSelect select element
+        seasonSelect.addEventListener('change', () => {
+            selectedSeason = seasonSelect.value;
+            reloadGallery()
+        });
+
+        // Listen for change events on the cardTypeSelect select element
+        cardTypeSelect.addEventListener('change', () => {
+            selectedCardType = cardTypeSelect.value;
+            reloadGallery()
+        });
+
+        // Listen for change events on the faction select element
+        factionSelect.addEventListener('change', () => {
+            selectedFaction = factionSelect.value;
+            reloadGallery()
+        });
+    </script>
 
     <script>
         // Function to get URL parameters
@@ -144,41 +204,52 @@
         }
 
         // Load images and display them in the gallery
-        function loadImagesForGallery(jsonData, season, cardType) {
+        function loadImagesForGallery(jsonData, season, cardType, faction) {
             const key = `${season}/${cardType}`; // Create key from selected season and card type
             let imagePaths = jsonData[key]; // Get image paths from JSON based on the key
 
-            // Sort the card by rating
-            imagePaths = sortImagesByKey(imagePaths, 'rating', 'descending');
+            // Set-up grid that will hold the cards
+            const cardGrid = document.getElementById('cardGrid');
+            cardGrid.innerHTML = ''; // Clear any existing content
 
             if (imagePaths && imagePaths.length > 0) {
-                const cardGrid = document.getElementById('cardGrid');
-                cardGrid.innerHTML = ''; // Clear any existing content
+
+                // Sort the card by rating
+                imagePaths = sortImagesByKey(imagePaths, 'rating', 'descending');
+                
+                // Iterate all of the images in the file path and add them to the gallery if they match 
+                // the specified conditions.
                 imagePaths.forEach((imagePath, index) => {
-                    const img = document.createElement('img');
-                    img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
-                    img.classList.add('card-image'); // Apply styling
-                    img.onclick = () => openPopup(index); // Attach onclick handler
-                    cardGrid.appendChild(img);
+                    if (faction == 'Both' || getValueFromImageName(imagePath, "faction") == faction.toLowerCase()){
+                        const img = document.createElement('img');
+                        img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
+                        img.classList.add('card-image'); // Apply styling
+                        img.onclick = () => openPopup(index); // Attach onclick handler
+                        cardGrid.appendChild(img);
+                    }
                 });
             } else {
                 console.error(`No images found for ${key} using JSON file lookup:\n`, jsonData);
             }
         }
 
+        function reloadGallery(){
+            loadGallery(selectedSeason, selectedCardType, selectedFaction);
+        }
+
         // Main function to load the gallery
-        function loadGallery() {
+        function loadGallery(season, cardType, faction) {
             // Fetch the selected season and card type from local storage
-            const season = localStorage.getItem('selectedSeason').replace("_", " ");
-            const cardType = localStorage.getItem('selectedCardType').replace("_", " ");
+            //const season = localStorage.getItem('selectedSeason').replace("_", " ");
+            //const cardType = localStorage.getItem('selectedCardType').replace("_", " ");
 
             // Set gallery header based on season and card type
-            document.getElementById('galleryHeader').textContent = `${season} - ${cardType} Cards`;
+            document.getElementById('galleryHeader').textContent = `${season} - ${nicifyString(cardType)} Cards`;
 
             // Load the JSON file containing image paths
             loadJsonFile('Files/imageList.json')
                 .then(jsonData => {
-                    loadImagesForGallery(jsonData, season, cardType);
+                    loadImagesForGallery(jsonData, season, cardType, faction);
                 })
                 .catch(error => {
                     console.error('Error loading JSON:', error);
@@ -220,7 +291,7 @@
         // Call the loadGallery function on page load
         document.addEventListener('DOMContentLoaded', function() {
             // Ensure the external JS file is fully loaded
-            loadGallery();
+            reloadGallery();
         });
     </script>
 </body>

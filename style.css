@@ -30,6 +30,27 @@ header {
     padding: 0px;
 }
 
+/* START OF NAV BAR */
+nav {
+    margin: 20px 0;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+}
+
+nav label {
+    color: #ffffff;
+    display: block; /* Make label block to occupy full width */
+    margin-bottom: 5px; /* Space between label and select */
+    font-weight: bold; /* Optional: make label text bold */
+    margin-right: 10px;
+}
+
+nav select {
+    margin-right: 10px;
+}
+/* END OF NAV BAR */
+
 section {
     padding: 10px;
 }

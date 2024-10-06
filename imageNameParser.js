@@ -68,3 +68,14 @@ function getImages(season, cardType) {
         }
     });
 }
+
+function nicifyString(str) {
+    // Use a regular expression to split on uppercase letters and keep them
+    const words = str.replace(/([A-Z])/g, ' $1').trim().split(' ');
+    
+    // Capitalize the first letter of each word
+    const capitalizedWords = words.map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase());
+    
+    // Join the words with a space
+    return capitalizedWords.join(' ');
+}
