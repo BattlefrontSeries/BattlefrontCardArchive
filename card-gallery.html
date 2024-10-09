@@ -8,73 +8,7 @@
     <!-- Include the imageNameParser.js file -->
     <script src="imageNameParser.js" defer></script> <!-- Defer ensures the script runs after the page loads -->
     <style>
-        /* Modal (Popup) styles */
-        #overlay {
-            display: none; /* Hidden by default */
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8); /* Dark background */
-            z-index: 1000;
-        }
-        #popupImage {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.5s ease; /* Smooth transition */
-            max-width: 80%;
-            max-height: 80%;
-        }
-
-        /* Navigation arrows */
-        .arrow {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 40px;
-            color: white;
-            cursor: pointer;
-            user-select: none;
-        }
-        #leftArrow {
-            left: 10px;
-        }
-        #rightArrow {
-            right: 10px;
-        }
-
-        /* Close button (optional) */
-        #closeBtn {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 30px;
-            color: white;
-            cursor: pointer;
-        }
-
-        #imageContainer {
-            position: relative;
-            width: 80%; /* Or your desired width */
-            height: 80%; /* Or your desired height */
-            overflow: hidden; /* Hide overflow to prevent showing the images outside */
-            pointer-events: none; /* Disable pointer events for this container */
-        }
-
-        #popupImage, #previousImage {
-            position: absolute; /* Allow for stacking */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            transition: transform 0.5s ease; /* Smooth transition */
-        }
-
-        #previousImage {
-            display: none; /* Initially hidden */
-        }
+        
 
     </style>
 </head>
@@ -190,15 +124,52 @@
                 
                 // Iterate all of the images in the file path and add them to the gallery if they match 
                 // the specified conditions.
-                imagePaths.forEach((imagePath, index) => {
-                    if (faction == 'Both' || getValueFromImageName(imagePath, "faction") == faction.toLowerCase()){
+                var spawnIndex = 0;
+                imagePaths.forEach((imagePath, fileIndex) => {
+                    if (faction == 'Both' || getValueFromImageName(imagePath, "faction") == faction.toLowerCase()) {
+
+                        // Create a container div for each image and spinner
+                        const container = document.createElement('div');
+                        container.classList.add('image-container');
+
+                        // Add the spinner element
+                        const spinner = document.createElement('div');
+                        spinner.classList.add('small-spinner');
+
+                        // Create the image element for this card in the grid layout
                         const img = document.createElement('img');
                         img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
                         img.classList.add('card-image'); // Apply styling
-                        img.onclick = () => openPopup(index); // Attach onclick handler
-                        cardGrid.appendChild(img);
+
+                        img.setAttribute('loading', 'lazy'); // Use lazy loading for performance
+
+                        // Use a closure to capture the value of spawnIndex correctly
+                        img.onclick = ((index) => () => openPopup(index))(spawnIndex);
+
+                        // When the image loads, hide the spinner
+                        img.onload = () => {
+                            spinner.style.display = 'none'; // Hide spinner once the image is loaded
+                            img.style.display = 'block'; // Show the image
+                        };
+
+                        // Handle image load failure
+                        img.onerror = () => {
+                            spinner.style.display = 'none'; // Hide spinner if the image fails to load
+                            container.innerHTML = '<p>Image failed to load</p>'; // Optional: Show error message
+                        };
+
+                        // Hide the image initially (it will show when loaded)
+                        img.style.display = 'none';
+
+                        // Append the spinner and image to the container
+                        container.appendChild(spinner);
+                        container.appendChild(img);
+
+                        cardGrid.appendChild(container); // Add the container to the grid
+                        spawnIndex++;
                     }
                 });
+
             } else {
                 console.error(`No images found for ${key} using JSON file lookup:\n`, jsonData);
             }
@@ -218,7 +189,7 @@
             document.getElementById('galleryHeader').textContent = `${season} - ${nicifyString(cardType)} Cards`;
 
             // Show the spinner
-            document.getElementById('loadingSpinner').style.display = 'block';
+            //document.getElementById('loadingSpinner').style.display = 'block';
 
             // Load the JSON file containing image paths
             loadJsonFile('Files/imageList.json')
