@@ -138,12 +138,14 @@
 
                         // Create the image element for this card in the grid layout
                         const img = document.createElement('img');
+                        // Hide the image initially (it will show when loaded)
+                        //img.style.display = 'none';
                         
                         // Use a closure to capture the value of spawnIndex correctly
                         img.onclick = ((index) => () => openPopup(index))(spawnIndex);
                         
                         // When the image loads, hide the spinner
-                        img.onload = () => {
+                        /*img.onload = () => {
                             spinner.style.display = 'none'; // Hide spinner once the image is loaded
                             img.style.display = 'block'; // Show the image
                         };
@@ -152,14 +154,15 @@
                         img.onerror = () => {
                             spinner.style.display = 'none'; // Hide spinner if the image fails to load
                             container.innerHTML = '<p>Image failed to load</p>'; // Optional: Show error message
-                        };
+                        };*/
 
                         img.src = `Files/CardArchive/${key}/${imagePath}`; // Use relative path to load images
-                        img.setAttribute('loading', 'lazy'); // Use lazy loading for performance
+                        // img.setAttribute('loading', 'lazy'); // Use lazy loading for performance
                         img.classList.add('card-image'); // Apply styling
 
-                        // Hide the image initially (it will show when loaded)
-                        img.style.display = 'none';
+                        // TMP FOR LOADING ISSUES
+                        spinner.style.display = 'none'; // Hide spinner once the image is loaded
+                        img.style.display = 'block'; // Show the image
 
                         // Append the spinner and image to the container
                         container.appendChild(spinner);

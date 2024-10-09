@@ -140,7 +140,9 @@ button {
 
 @media screen and (orientation: portrait) {
     .grid-container {
-        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Thinner columns for portrait mode */
+        display: none; /* Hide the grid initially, will change to grid when loaded */
+        gap: 8px; /* Adjusts the space between images */
+        /*grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));*/ /* Thinner columns for portrait mode */
     }
 }
 
